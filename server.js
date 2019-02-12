@@ -47,6 +47,27 @@ const server = http.createServer((req, res) => {
       contentType = 'image/jpg';
       break;
   }
+
+  // read file
+  fs.readFile(filePath, (err, content) => {
+    if(err) {
+      if(err.code == 'ENOENT') {
+        //page not found
+        fs.readFile(path.join(__dirname, 'public', '404.html'), (err, content) => {
+          res.writeHead(200, {'Content-Type': 'text/html'});
+          res.end(content, 'utf8');
+        })
+      } else {
+        // some server error
+        res.writeHead(500);
+        res.end(`server error: ${err.code}`);
+      }
+    } else {
+      // success
+      res.writeHead(200, {'Content-Type': contentType});
+      res.end(content, 'utf8');
+    }
+  });
 });
 
 const PORT = process.env.port || 5000;
